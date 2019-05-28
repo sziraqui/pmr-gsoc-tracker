@@ -8,13 +8,13 @@ A free and Open Source alternative to Amazon Rekognition.
 The project is divided into 3 parts-    
 
 **1. Nodoface** (Phase 1 : Jun 3 - Jun 24)  
-Nodejs bindings for [Tadas OpenFace](https://github.com/TadasBaltrusaitis/OpenFace) to bring all face detection and facialattribute prediction features into PMR   
+Nodejs bindings for [Tadas OpenFace](https://github.com/TadasBaltrusaitis/OpenFace) to bring all face detection and facial attribute prediction features into PMR   
 
 **2. PMR-Core** (Phase 2 : Jun 28 - July 22)    
 Will include    
 - TensorflowJS implementation of [ArcFace](https://github.com/deepinsight/insightface).
-- Integration of Nodoface and ArcFace TFJS model into a high levelAPI in TypeScript.   
-- Real-time video annotation using object tracking and PMR-Corefor local execution.    
+- Integration of Nodoface and ArcFace TFJS model into a high level API in TypeScript.   
+- Real-time video annotation using object tracking and PMR-Core for local execution.    
 
 **3. PMR-web**  (Phase 3: July 26 - August 19)    
 A REST API for PMR-Core following Amazon Rekognition API design.  
@@ -24,7 +24,7 @@ A REST API for PMR-Core following Amazon Rekognition API design.
 ### Coding Period 1 
 **Week 1 (May 27 - Jun 3)** 6hr/d
 - [ ] Project Tracker
-- [ ] Environment setup with vcpkg (Compile OpenCV, Dlib, OpenFace)
+- [x] Environment setup with vcpkg (Compile OpenCV, Dlib, OpenFace)
 - [ ] NAPI practice
 - [ ] Select OpenFace classes and methods to be binded
 
