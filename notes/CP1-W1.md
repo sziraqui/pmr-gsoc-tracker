@@ -46,7 +46,7 @@ Either submit PR to vcpkg repo or add the port to $vcpkgRoot/ports locally. Then
 
 ### Results after setup
 Removed existing opencv and dlib from /usr/local
-Manual compilation from source using instructions from install.sh completed successfully.
+Manual compilation from source using instructions from install.sh completed successfully. 
 
 Executing sample binary     
 `./bin/FaceLandmarkVid -f "../samples/2015-10-15-15-14.avi"`        
@@ -78,7 +78,17 @@ Aborted (core dumped)
 ```
 Installing opencv and dlib from vcpkg and then compiling OpenFace has no effect. 
 
-//todo: Fix above errors
+#### Solution
+Model files (*.dat) were probably corrupt.  
+Redownloading and copying models to build directory fixed the problem. 
+```
+cd <openface_root_dir>
+rm lib/local/LandmarkDetector/model/patch_experts/*.dat
+./download_models.sh
+cp -r lib/local/LandmarkDetector/model/patch_experts/ build/bin/model
+```
+Once everythig is working fine, I did
+`sudo make install` from OpenFace build directory to install the library in `/usr/local`
 
 ## NAPI - pre-requisites for Nodoface
 
