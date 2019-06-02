@@ -98,9 +98,74 @@ A build system made for Node Addons. It's an alternative to cmake
 ### bindings.gyp
 The CMakeLists.txt for node-gyp. A python-like dictionary with support for variables and commands.
 [Example projects](https://github.com/nodejs/node-gyp/wiki/%22binding.gyp%22-files-out-in-the-wild) using bindings.gyp
+#### bindings.gyp of [nodecv](https://github.com/macacajs/nodecv/blob/master/binding.gyp) project
+```
+{
+  "variables": {
+    "module_name": "nodecv",
+    "module_path": "./build",
+    "opencv_version": "2.4.13.2"
+  },
+  "targets": [{
+    "target_name": "<(module_name)",
+      "sources": [
+        "src/init.cc",
+        "src/core/Mat.cc",
+        "src/highgui/highgui.cc",
+        "src/objdetect/CascadeClassifier.cc",
+        "src/features2d/features2d.cc",
+        "src/imgproc/imgproc.cc"
+      ],
+      "libraries": [
+        "<!@(pkg-config \"opencv >= <(opencv_version)\" --libs)"
+      ],
+      "include_dirs": [
+        "<!@(pkg-config \"opencv >= <(opencv_version)\" --cflags)",
+        "<!(node -e \"require('nan')\")"
+      ],
+      "cflags!" : [
+        "-fno-exceptions"
+      ],
+      "cflags_cc!": [
+        "-fno-rtti",
+        "-fno-exceptions"
+      ],
+      "conditions": [
+        [
+          "OS==\"linux\" or OS==\"freebsd\" or OS==\"openbsd\" or OS==\"solaris\" or OS==\"aix\"",
+          {
+            "cflags": [
+              "<!@(pkg-config \"opencv >= <(opencv_version)\" --cflags)",
+              "-Wall"
+            ]
+          }
+        ],
+      ],
+    }, 
+  ]
+}
+```
 
 ### GYP files
-// In progress: Reading [Input Format specification](https://gyp.gsrc.io/docs/InputFormatReference.md)
+GYP files are python-like dictionaries that encompass instructions to a build system to compile a c/c++ project. It is a tool written in python 2.
+The confusing parts of .gyp file are those using !,<,>,@, and any combination of these symbols on keys or values.    
+My understanding so far:    
+**<** : Expands a variable in early phase of GYP. Eg. `<(module_name)` will be replaced with value of `module_name` key in `variables` dict.    
+**>** : Similar to **<** but expansion happens in Late phase of GYP. In general, < should be prefered.    
+**!** : As suffix to a key, `key!` will exclude the values associated with it. Eg. `cflags! : ['-fnoexceptions']` implies -fnoexceptions flag is not to be used. As prefix to a value `!(value)` will execute `value` as a shell command.   
+**@** : Expands a whitespace separated string into a list. Eg. `<!@(pkg-config --cflags opencv)` will execute the shell command and each line of output will become an item of the enclosing list.    
+More symbols exists viz. `=`, `+`, `?`, `$` but they are not used often in a node-gyp project.    
+
+Explaination of nodecv's binding.gyp file based on [Input Format specification](https://gyp.gsrc.io/docs/InputFormatReference.md) and [node-gyp documentation](https://github.com/nodejs/node-gyp):     
+**variables**: Keys used to reference variable values in other parts of the .gyp file.
+**targets**: Defines the build (for generating Makefile). Each item in the list will result in creation of .node file in a node-gyp project.     
+**target_name**: Name of compiled .node file without extension.    
+**sources** : List of source files (.cpp/.cc) to be compiled.     
+**cflags** : Compiler flags (-Wsomething).    
+**include_dirs** : List of include paths to be passed to compiler with -I flag.     
+**libraries** : List of libs path to be passed to compiler with -l flag.     
+**conditions** : List of sub-dicts to be merged depending on conditions in first item of each list. Second item is the actual dict to be merged with parent.
+
 
 ### NAPI tutorials and examples
 - [x] [Beginners guide to writing Nodejs C++ Addons](https://medium.com/@atulanand94/beginners-guide-to-writing-nodejs-addons-using-c-and-n-api-node-addon-api-9b3b718a9a7f)
