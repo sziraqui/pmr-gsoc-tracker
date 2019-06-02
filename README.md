@@ -23,10 +23,10 @@ A REST API for PMR-Core following Amazon Rekognition API design.
 ## Complete timeline
 ### Coding Period 1 
 **Week 1 (May 27 - Jun 3)** 6hr/d
-- [ ] Project Tracker
+- [x] Project Tracker
 - [x] Environment setup ~~with vcpkg~~ (Compile OpenCV, Dlib, OpenFace)
 - [x] NAPI practice
-- [ ] Select OpenFace classes and methods to be binded
+- [x] Select OpenFace classes and methods to be binded
 
 **Week 2 (Jun 3 - Jun 10)** 6hr/d   
 Write bindings for:
