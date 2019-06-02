@@ -42,7 +42,7 @@ Alternatively, create portfile.cmake for OpenFace as explained [here](https://gi
 Either submit PR to vcpkg repo or add the port to $vcpkgRoot/ports locally. Then simply call vcpkg install.
 
 #### 2. [Conan](https://conan.io)
-// Todo
+// Todo (Not using it, may try later)
 
 ### Results after setup
 Removed existing opencv and dlib from /usr/local
@@ -157,14 +157,14 @@ My understanding so far:
 More symbols exists viz. `=`, `+`, `?`, `$` but they are not used often in a node-gyp project.    
 
 Explaination of nodecv's binding.gyp file based on [Input Format specification](https://gyp.gsrc.io/docs/InputFormatReference.md) and [node-gyp documentation](https://github.com/nodejs/node-gyp):     
-**variables**: Keys used to reference variable values in other parts of the .gyp file.
+**variables**: Keys used to reference variable values in other parts of the .gyp file.   
 **targets**: Defines the build (for generating Makefile). Each item in the list will result in creation of .node file in a node-gyp project.     
 **target_name**: Name of compiled .node file without extension.    
 **sources** : List of source files (.cpp/.cc) to be compiled.     
 **cflags** : Compiler flags (-Wsomething).    
 **include_dirs** : List of include paths to be passed to compiler with -I flag.     
 **libraries** : List of libs path to be passed to compiler with -l flag.     
-**conditions** : List of sub-dicts to be merged depending on conditions in first item of each list. Second item is the actual dict to be merged with parent.
+**conditions** : List of sub-dicts to be merged depending on conditions in first item of each list. Second item is the actual dict to be merged with parent.     
 
 
 ### NAPI tutorials and examples
@@ -172,4 +172,41 @@ Explaination of nodecv's binding.gyp file based on [Input Format specification](
 - [ ] [NAPI Asynchronous worker](http://www.adaltas.com/en/2018/12/12/native-modules-node-js-n-api/)
 
 ## Nodoface project setup
-//todo
+### Initial setup on CLion
+No IDE yet supports node-gyp.
+CLion generates an index of classes, methods, etc using headers. Header location is retrieved from CMakeLists.txt. In absence of cmake lists, CLion will not recognise a project as a C++ project and autocomplete will not work. As a workaround, a dummy CMakeLists.txt will be added to Nodoface while I am working on CLion in the first week.    
+Example of dummy CMakeLists.txt:
+```
+# dummy cmakelists to make intellisense work in CLion
+cmake_minimum_required(VERSION 3.12)
+project(dummy)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+set(SOURCE_FILES src/main.cpp src/funcs.cpp)
+include_directories(node_modules/node-addon-api node_modules/node-addon-api/src)
+
+add_executable(dummy ${SOURCE_FILES})
+```
+The project will be like any npm project with a package.json file. A binding.gyp file will rest alongside package.json. A src directory will have C++ code and structure will be like any typical C++ project. An api directory will hold the .js files that will handle importing .node files and exporting them into a familiar nodejs module. It will also hold typings to support TypeScript.
+```
+Nodoface/
+- package.json
+- binding.gyp
+- CMakeLists.txt (dummy)
+- src/
+  - bindings code (C++ project)
+- api/
+  - .js files
+  - typings
+- examples/
+  - .ts files (using the API manually testing it)
+```
+Later on, I will write a plugin to support node-gyp.
+## Things to do in week 2
+Next, I will start working on Nodoface by writing bindings for following classes:
+(All paths are relative to OpenFace's root directory)
+1. ImageCapture:    
+  Implemented in lib/local/Utilities/src/ImageCapture.cpp
+  It supports reading image frames from image directory, video file or webcam. However, it is used only for image directory.
+2. SequenceCapture:
+   Defined in lib/local/Utilities/src/SequenceCapture.cpp
+   Similar to ImageCapture but used only for webcam and video files.
