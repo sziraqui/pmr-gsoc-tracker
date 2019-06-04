@@ -7,7 +7,7 @@ A free and Open Source alternative to Amazon Rekognition.
 
 The project is divided into 3 parts-    
 
-**1. Nodoface** (Phase 1 : Jun 3 - Jun 24)  
+[**1. Nodoface**](https://github.com/sziraqui/nodoface) (Phase 1 : Jun 3 - Jun 24)  
 Nodejs bindings for [Tadas OpenFace](https://github.com/TadasBaltrusaitis/OpenFace) to bring all face detection and facial attribute prediction features into PMR   
 
 **2. PMR-Core** (Phase 2 : Jun 28 - July 22)    
