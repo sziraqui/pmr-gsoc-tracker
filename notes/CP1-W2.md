@@ -104,9 +104,50 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 ```
 Build succesful! But when importing the addon in node, I get the old opendl error again. This error occurs when a source file or lib is missing [3]. I guess the missing lib was opencv because it was also statically compiled. pkg-config command in binding.gyp returns clfags which work only for shared libraries. OpenCV was compiled as per OpenFace's instructions and this resulted in statically compiled OpenCV. Now recompiling opencv with its default shared library configuration gave me some relief. But here comes another issue. Libboost which is a dependency of both OpenFace and OpenCV uses a non-standard installation prefix on Ubuntu. OpenCV cmake script couldn't find two important libs .vz libboost and openblas. See [this](https://github.com/opencv/opencv/issues/9953) issue for details. Finally, I decided to compile libboost and openblas from source. I hope this will help solve the opendl error I am facing for the past 4 days (first encountered on June 6)
 
+### Finally all errors are gone!
+OpenFace was compiled as static with PIC but still I faced the same errors. Either I wrote binding.gyp incorrectly to include static OpenFace lib or node-gyp just doesn't support linking against static libs. Whatever be the reason, I decided to recompile OpenFace as shared lib. I had to make some changes to its CMakeLists.txt files. The modified OpenFace project is on [my fork](https://github.com/sziraqui/OpenFace/tree/dynamic-compile). The binding.gyp file will now have
+```
+'libraries+': [
+            '-L/usr/local/lib',
+            '-lUtilities',
+        ],
+'include_dirs+': [
+            '/usr/local/include',
+            '/usr/local/include/OpenFace'
+        ],
+```
+within `conditions` array for linux.
+
+## Initial test of ImageCapture bindings
+`nodoface/examples/image_capture_example.js` runs all binded methods. A directory containing images was passed to ImageCapture.Open() with -fdir switch. Before executing NextImage(), getProgress returns 0 and Width and Height attributes are garbage values. After executing NextImage(), progress attribute is increased, image height and width are 479 and 639. The actual image dimensions are 480 and 640. Values were decremented with setters and they are working. Next task is to convert between cv::Mat and Napi::Array.
+```
+Attempting to read from directory: /home/sziraqui/Projects/OpenFace/samples/image_sequence
+Actual properties 
+progress 0 
+Image Ht 32653 
+Image Wd 1973120160 
+Fx -1 
+Fy -1 
+Cx -1 
+Cy -1 
+Next Image true 
+Gray frame true
+New properties 
+progress 0.03333333333333333 
+Image Ht 479 
+Image Wd 639 
+Fx 501 
+Fy 501 
+Cx 321 
+Cy 241 
+Next Image true 
+Gray frame true
+
+```
 
 ## References
 [1] [Linking to static libraries node-gyp issue 328](https://github.com/nodejs/node-gyp/issues/328)     
 [2] [Setting -fPIC to cmake build](https://stackoverflow.com/questions/38296756/what-is-the-idiomatic-way-in-cmake-to-add-the-fpic-compiler-option)    
 [3] [dlopen error with statically compiled opencv](https://github.com/justadudewhohacks/opencv4nodejs/issues/113)    
 [4] [OpenCV cannot find installed openblas headers](https://github.com/opencv/opencv/issues/9953)
+[5] [Compile OpenFace as shared library](https://github.com/TadasBaltrusaitis/OpenFace/issues/23)
