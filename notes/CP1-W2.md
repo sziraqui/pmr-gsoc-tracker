@@ -145,9 +145,67 @@ Gray frame true
 
 ```
 
+## Handling cv::Mat types
+C++ side uses `cv::Mat` to represent images. There is no standard way in node to efficiently represent an image. Canvas could have been used if there was no overhead of DOM. The simplest way I think is to use `Uint8Array`. The image will be flattened in C++ side into a 1-D array (pointer to uint8_t) and then converted to either a `Napi::TypedArrayOf<primitive_type>` or    `Napi::ArrayBuffer`. Both can be passed to nodejs side for using elsewhere.
+### Image from Nodejs to C++
+Image as JS Uint8Array has underlying ArrayBuffer. We can get reference to the ArrayBuffer on C++ side and get a pointer to its underlying primitive array;
+```
+Napi::Uint8Array img = info[0].As<Napi::Uint8Array>();
+Napi::ArrayBuffer buf = img.ArrayBuffer();
+uint8_t * raw = reinterpret_cast<uint8_t*>(buf.Data());
+```
+Refer [6] for a concrete example
+### Image from C++ to Nodejs
+`cv::Mat` is stored as a 1-D array. Dimension of `cv::Mat` is atleast 2 (rows, cols) and usually goes till 4 (rows, cols, channels, alpha). I do not need to handle `cv::Mat` of higher dimensions. Each row is guaranteed to have contigious memory allocation. After a row, some padding may be present. This is called `step_size` in CV jargon. Each row may have a different step_size.
+If `mat.isContinuous()` is true, step_size is zero for every row and the array we need is simply `mat.data` [8]
+```
+std::vector<uchar> array(mat.rows*mat.cols);
+if (mat.isContinuous())
+    array = mat.data;
+```
+Otherwise, we need to copy each pixel as by `mat.at(i,j)` [2D] or `mat.at(i,j,k)` [3D]. For now, let's not conside higher dimensions. Easier solution is to make every mat continuous and then get `mat.data`. Any Mat constructed with Mat constructor is continuous. Mat constructed from anything other than OpenCV by referencing memory may not be continuous. Eg. bmp images.
+Hence, copying pixels cannot be avoided if we want to avoid calculating addresses of pixels on JS side.
+```
+if ( ! mat.isContinuous() ) { 
+    mat = mat.clone(); // O(rows*cols*channels)
+}
+uint8_t * data = mat.data; // O(1)
+``` 
+Then this 1-D array can be converted to `Napi::ArrayBuffer` or `Napi::Uint8Array` and passed to nodejs side.  
+First construct ArrayBuffer from pointer to c++ array using this method
+```
+static ArrayBuffer Napi::ArrayBuffer::New(
+    napi_env env,
+    void * 	externalData,
+    size_t 	byteLength 
+)	
+```
+For Uint8Array, byteLength is 1 (8 bit = 1 byte)
+Then create `Napi::Uint8Array` or any other `Napi::TypedArrayOf<type>` with his method
+```
+static TypedArrayOf Napi::TypedArrayOf<T>::New(
+    napi_env env,
+    size_t elementLength,
+    Napi::ArrayBuffer arrayBuffer,
+    size_t bufferOffset,
+    napi_typedarray_type type = TypedArray::TypedArrayTypeForPrimitiveType<T>() 
+)	
+```
+byteOffset can be set to zero.
+For initializing Uint8ClampedArray, type must be explicitly specified
+```
+Uint8Array::New(env, length, buffer, 0, napi_uint8_clamped_array) 
+```
+length = buffer.Data/buffer.ByteLength()
+
 ## References
 [1] [Linking to static libraries node-gyp issue 328](https://github.com/nodejs/node-gyp/issues/328)     
 [2] [Setting -fPIC to cmake build](https://stackoverflow.com/questions/38296756/what-is-the-idiomatic-way-in-cmake-to-add-the-fpic-compiler-option)    
 [3] [dlopen error with statically compiled opencv](https://github.com/justadudewhohacks/opencv4nodejs/issues/113)    
-[4] [OpenCV cannot find installed openblas headers](https://github.com/opencv/opencv/issues/9953)
-[5] [Compile OpenFace as shared library](https://github.com/TadasBaltrusaitis/OpenFace/issues/23)
+[4] [OpenCV cannot find installed openblas headers](https://github.com/opencv/opencv/issues/9953)    
+[5] [Compile OpenFace as shared library](https://github.com/TadasBaltrusaitis/OpenFace/issues/23)    
+[6] [JS ArrayBuffer to C++ array](https://github.com/nodejs/node-addon-examples/blob/master/array_buffer_to_native/node-addon-api/array_buffer_to_native.cc)    
+[7] [cv::Mat documentation](https://docs.opencv.org/3.4.6/d3/d63/classcv_1_1Mat.html#details)       
+[8] [cv::Mat to array/vector](https://stackoverflow.com/a/26685567/6699069)     
+[9] [Napi::ArrayBuffer from c++ array](https://nodejs.github.io/node-addon-api/class_napi_1_1_array_buffer.html#ad773d4b1e1c664a94fa9e47954a9012f)        
+[10] [Napi::TypedArrayOf<T> from Napi::ArrayBuffer](https://nodejs.github.io/node-addon-api/class_napi_1_1_typed_array_of.html#af27064a817bd47ae1133c455d6e1e267)       
