@@ -30,8 +30,8 @@ A REST API for PMR-Core following Amazon Rekognition API design.
 
 **Week 2 (Jun 3 - Jun 10)** 6hr/d   
 Write bindings for:
-- [ ] Image I/O utilities
-- [ ] Video I/O utilities
+- [x] Image I/O utilities
+- [x] Video I/O utilities
 
 **Week 3 (Jun 10 - Jun 17)** 8hr/d  
 Bindings for face detection models
