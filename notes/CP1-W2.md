@@ -198,6 +198,54 @@ Uint8Array::New(env, length, buffer, 0, napi_uint8_clamped_array)
 ```
 length = buffer.Data/buffer.ByteLength()
 
+### Implementation result
+I made a helper class NdArray to manage passing images. This class for responsible for all the above conversions using just built-in JavaScript types. When tested on cv::Mat, it did not work :(. When I try to pass the Napi::Object holding Mat's data as Uint8Array to nodejs side, I encountered suspicious error 'Unknown Failure' is all I got from the error message. This wasted a lot of my time. Almost 4 days. I decided to drop the idea of NdArray and moved on to wrapping cv::Mat.
+
+### Bindings for cv::Mat
+As I mentioned earlier, wrapping cv::Mat is really a task. It's a huge class and has a lot of dependent classes. But I just need to pass on the Mat data. I really don't need all the static methods and instance methods that Mat provides. Just a light-weight wrapper that will allow me passing an image to/from Nodejs and C++.
+
+### New approach comes with new problems
+Binding any c++ datatype seems straight-forward.... at first. 
+
+To bind cv::Mat 
+1. Create a new class say `Nodoface::Image` extending `Napi::ObjectWrap<Nodoface::Image>`. 
+2. Create a static `Napi::FunctionReference` variable that will be responsible for instantiating and deleting the wrapper class and synchronising it with Nodejs.
+3. Maintain a private instance of cv::Mat that the wrapper respresents. 
+4. A constructor for instantiating it from Nodejs
+     
+I really do not need to bind any methods of cv::Mat but for sake of testing, I wrote methods to retrieve Mat's dimensions and its CV_XCN value known as 'type'.    
+**Creating the constructor**    
+I need two constructors. One for that accepts a cv::Mat from within cpp and one that accepts parameters like Uint8Array from Nodejs.
+Now to use this wrapper, I will get cv::Mat returned from ImageCapture.GetNextFrame(), create an instance of `Nodoface::Image` and return it from our ImageCapture.GetNextFrame() wrapper function. Implementation completed but got 'Unknown failure' whenever I return my wrapper instance to nodejs.   
+**Why?**   
+Because ObjectWrap<T> IS NOT a subclass of Napi::Value! I should get Napi::Object (a subclass of Napi::Value) from Nodoface::Image. But there is no method within ObjectWrap<T> that converts it to Object! What's the use of ObjectWrap then? Turns out that it is only used to define the wrapper object and not for creating its instances directly.     
+What about the static FunctionReference 'constructor'?      
+I have a static constructor variable but I never every used it. Digging into the node-addon-examples, I found it has a method 'New' which returns Napi::Object!    
+
+Putting it all together:
+1. NewInstance(cv::Mat) converts cv::Mat to Uint8Array (data), Int32Array (dimensions) and Number (type).
+2. These three arguments are passed to constructor.New() which accepts initalizer_list of `Napi::Value`s.
+3. constructor.New() call is equivalent to calling the wrapper class's constructor from Nodejs. It creates an instance on Node side and hence a corresponding instance is created on c++ side.
+4. Inside the class constructor, I have to use Uint8Array data and Mat dimensions to reconstruct the cv::Mat. (redundant right?).
+5. Finally, constructor.New() returns Napi::Object of the wrapper class. This can be passed to Nodejs from any C++ function.
+
+Everything implemented over a night. No errors this time!
+But my happiness was about vanish. Recived image is not the original image retured from ImageCapture. It is just a Mat with garbage values. Moreover, I got segfault many a times. I am already behind schedule, I dropped previous NdArray code (which was 4 days of work!) and now the new method is still not working. I talked to my mentor Carlos, got the energy to continue working on this and raised this issue to the developers of node-addon-api [[11]](https://github.com/nodejs/node-addon-api/issues/500) on his advice. 
+
+The developers behind NAPI are genius minds and extremely busy folks. They really don't have the time to answer an issue with a detailed solution. We must pay attention to every word they say while answering our issue. One of the devs pointed out the problem as being related to memory allocation of data pointer. He said I should `ensure the Mat data is not on stack`. This was the key! But it took me to relate it to my code. 
+### Always look back to fundamentals!
+Being a Java and Python programmer for over 2 years, I assumed any class instance I created was on Heap. But in C++, you have to explicitly use `new` operator to create objects on heap instead of stack. Any stack allocated data exists in memory as long as it is in scope. Whereas, objects on Heap remains in memory until we `delete[]` them explicitly. So after wasting a lot of time to find a solution in node-addon-api (tried things like EscapableHandleScope, Napi::Reference), I finally found the solution in C++ fundamentals. I just needed to add stars to my code :P    
+Changing `cv::Mat mat(params..)` to `cv::Mat* mat = new cv::Mat(params..)` fixed the data loss problem.
+
+## Wrap up week 2
+Something I proposed to finish in one week took me over 2 weeks. Evaluation phase is approaching and I must finish the remaining work before it. But I am very confident with node-addon-api now. The issues I faced this week forced me to goto to source code level of the node-addon-api to undertand how things actually work in it. I would attribute the time loss to lack of documentation. But thats the case with any evolving technology. Nevertheless, now I can blindly write bindings to any C++ class regardless of its complexity. 
+
+## Week 3 todos:
+1. Bindings for OpenFace's Face detection models.
+2. TypeScript API for all the work done so far.
+I have 4 days left to complete 2 weeks work. Hope I can complete it.
+
+
 ## References
 [1] [Linking to static libraries node-gyp issue 328](https://github.com/nodejs/node-gyp/issues/328)     
 [2] [Setting -fPIC to cmake build](https://stackoverflow.com/questions/38296756/what-is-the-idiomatic-way-in-cmake-to-add-the-fpic-compiler-option)    
@@ -209,3 +257,4 @@ length = buffer.Data/buffer.ByteLength()
 [8] [cv::Mat to array/vector](https://stackoverflow.com/a/26685567/6699069)     
 [9] [Napi::ArrayBuffer from c++ array](https://nodejs.github.io/node-addon-api/class_napi_1_1_array_buffer.html#ad773d4b1e1c664a94fa9e47954a9012f)        
 [10] [Napi::TypedArrayOf<T> from Napi::ArrayBuffer](https://nodejs.github.io/node-addon-api/class_napi_1_1_typed_array_of.html#af27064a817bd47ae1133c455d6e1e267)       
+[11] [Send C++ class to nodejs without data loss](https://github.com/nodejs/node-addon-api/issues/500)
