@@ -35,14 +35,14 @@ Write bindings for:
 
 **Week 3 (Jun 10 - Jun 17)** 8hr/d  
 Bindings for face detection models
-- [ ] YOLO and TinyYOLO models
-- [ ] MTCNN model
+- [ ] ~~YOLO and TinyYOLO models~~ Dropped.
+- [ ] MTCNN model (In progress)
 
 **Week 4 (Jun 17 - Jun 24)** 6hr/d  
 Bindings for facial attributes
 - [ ] Gender classification
 - [ ] Age group prediction
-- [ ] Eye-gaze estimation
+- [ ] Eye-gaze estimation (In progress)
 
 **Evalution (Jun 24 - Jun 28)** 6hr/d
 
