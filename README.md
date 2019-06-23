@@ -37,12 +37,15 @@ Write bindings for:
 Bindings for face detection models
 - [ ] ~~YOLO and TinyYOLO models~~ Dropped.
 - [x] MTCNN model
+Additional models
+- [x] Dlib HOG-based face detector
+- [x] Haar cascades face detector
 
 **Week 4 (Jun 17 - Jun 24)** 6hr/d  
 Bindings for facial attributes
-- [ ] Gender classification
-- [ ] Age group prediction
-- [ ] Eye-gaze estimation (In progress)
+- [ ] ~~Gender classification~~ (Optional, dropped)
+- [ ] ~~Age group prediction~~ (Optional, dropped)
+- [x] Eye-gaze estimation
 
 **Evalution (Jun 24 - Jun 28)** 6hr/d
 
