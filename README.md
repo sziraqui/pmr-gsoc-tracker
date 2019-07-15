@@ -51,11 +51,11 @@ Bindings for facial attributes
 
 ### Coding Period 2
 **Week 1 (Jun 28 - July 5)** 8hr/d
-- [ ] ArcFace implementation in TensorflowJS
-- [ ] Train and test on small dataset
+- [x] ArcFace implementation in TensorflowJS 
+- [x] Train and test on small dataset 
 
 **Week 2 (Jul 5 - Jul 12)** 8hr/d
-- [ ] Attempt to convert pretrained MXNET model to Tensorflow model
+- [x] Attempt to convert pretrained MXNET model to Tensorflow model
 - [ ] Training and testing scripts for large datasets
 
 **Week 3 (Jul 12 - Jul 19)** 6hr/d
