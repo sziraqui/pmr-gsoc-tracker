@@ -59,7 +59,7 @@ Bindings for facial attributes
 - [ ] Training and testing scripts for large datasets
 
 **Week 3 (Jul 12 - Jul 19)** 6hr/d
-- [ ] Nodoface and ArcFace integration
+- [x] Nodoface and ArcFace integration
 - [ ] Implementation of SORT/DeepSORT (object tracking)
 
 **Week 4 (Jul 19 - Jul 22)** 8hr/d
