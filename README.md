@@ -10,7 +10,7 @@ The project is divided into 3 parts-
 [**1. Nodoface**](https://github.com/sziraqui/nodoface) (Phase 1 : Jun 3 - Jun 24)  
 Nodejs bindings for [Tadas OpenFace](https://github.com/TadasBaltrusaitis/OpenFace) to bring all face detection and facial attribute prediction features into PMR   
 
-**2. PMR-Core** (Phase 2 : Jun 28 - July 22)    
+[**2. PMR-Core**](https://github.com/sziraqui/pmr-core) (Phase 2 : Jun 28 - July 22)    
 Will include    
 - TensorflowJS implementation of [ArcFace](https://github.com/deepinsight/insightface).
 - Integration of Nodoface and ArcFace TFJS model into a high level API in TypeScript.   
