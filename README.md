@@ -60,10 +60,10 @@ Bindings for facial attributes
 
 **Week 3 (Jul 12 - Jul 19)** 6hr/d
 - [x] Nodoface and ArcFace integration
-- [ ] Implementation of SORT/DeepSORT (object tracking)
+- [x] Implementation of SORT/DeepSORT (object tracking)
 
 **Week 4 (Jul 19 - Jul 22)** 8hr/d
-- [ ] Video annotation with object tracking
+- [x] Video annotation with object tracking (segfault)
 
 **Evaluation (Jul 22 - Jul 26)** 6hr/d
 
