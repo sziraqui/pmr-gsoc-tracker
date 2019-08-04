@@ -16,7 +16,7 @@ Will include
 - Integration of Nodoface and ArcFace TFJS model into a high level API in TypeScript.   
 - Real-time video annotation using object tracking and PMR-Core for local execution.    
 
-**3. PMR-web**  (Phase 3: July 26 - August 19)    
+[**3. PMR-web**](https://github.com/sziraqui/pmr-server)  (Phase 3: July 26 - August 19)    
 A REST API for PMR-Core following Amazon Rekognition API design.  
  
 ---
@@ -63,14 +63,14 @@ Bindings for facial attributes
 - [x] Implementation of SORT/DeepSORT (object tracking)
 
 **Week 4 (Jul 19 - Jul 22)** 8hr/d
-- [x] Video annotation with object tracking (segfault)
+- [x] Video annotation with object tracking
 
 **Evaluation (Jul 22 - Jul 26)** 6hr/d
 
 ### Coding Period 3
 **Week 1 (Jul 26 - Aug 2)** 6hr/d
-- [ ] Amazon rekognition Datatypes and Actions
-- [ ] LFW face embeddings database
+- [x] Amazon rekognition Datatypes and Actions
+- [x] LFW face embeddings database
 
 **Week 2 (Aug 2 - Aug 9)** 6hr/d
 - [ ] REST API for face detection and verification on images
